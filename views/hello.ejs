@@ -10,18 +10,19 @@
     <h1 class="display-4"><%=title %></h1>
 </header>
 <div role="main">
-    <% if(content !=null){ %>
-    <ol>
-        <% for(var i in content) { %>
-            <% var obj =content[i]; %>
-            <li>
-                <a href ="<%=obj.link %>">
-                    <%=obj.title %>
-                </a>
-            </li>
+    <table class="table">
+     <% if (content != null) { %>
+            <% for (var i in content) { %>
+                <% var obj = content[i]; %>
+                <tr>
+                    <th><%= obj.id %></th>
+                    <td><%= obj.name %></td>
+                    <td><%= obj.mail %></td>
+                    <td><%= obj.age %></td>
+                </tr>
+            <% } %>
         <% } %>
-    </ol>
-    <% } %>
+    </table>
 </div>
 </body>
 </html>
