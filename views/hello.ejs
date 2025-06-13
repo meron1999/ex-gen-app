@@ -10,7 +10,18 @@
     <h1 class="display-4"><%=title %></h1>
 </header>
 <div role="main">
-    <p><%-content %></p>
+    <% if(content !=null){ %>
+    <ol>
+        <% for(var i in content) { %>
+            <% var obj =content[i]; %>
+            <li>
+                <a href ="<%=obj.link %>">
+                    <%=obj.title %>
+                </a>
+            </li>
+        <% } %>
+    </ol>
+    <% } %>
 </div>
 </body>
 </html>
