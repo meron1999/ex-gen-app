@@ -6,16 +6,26 @@ const db = new sqlite3.Database('mydb.sqlite3');
 
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
+router.get('/', (req, res, next) =>{
   db.serialize(() => {
-    db.all("SELECT * FROM mydata", (err, rows) => {
+    var htmlRowsString ='';
+    db.each("SELECT * FROM mydata", (err, rows) => {
       if (err) {
         res.status(500).json({ error: err.message });
         return;
       }
+      else{
+        htmlRowsString +="<tr><th>" + rows.id + "</th><td>" + rows.name + "</td></tr>";
+      }   
+    }
+      ,(err, count) => {
+        if (err) {
+          res.status(500).json({ error: err.message });
+          return;
+        }
       var data ={
         title: 'Hello!',
-        content:rows
+        content:htmlRowsString
       };
       res.render('hello', data);
     });

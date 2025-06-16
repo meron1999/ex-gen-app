@@ -11,17 +11,7 @@
 </header>
 <div role="main">
     <table class="table">
-     <% if (content != null) { %>
-            <% for (var i in content) { %>
-                <% var obj = content[i]; %>
-                <tr>
-                    <th><%= obj.id %></th>
-                    <td><%= obj.name %></td>
-                    <td><%= obj.mail %></td>
-                    <td><%= obj.age %></td>
-                </tr>
-            <% } %>
-        <% } %>
+        <%- content %>
     </table>
 </div>
 </body>
