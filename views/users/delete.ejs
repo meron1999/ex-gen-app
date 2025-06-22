@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link type="text/css" rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" crossorigin="anonymous">
+    <title><%=title %></title>
+</head>
+<body class="container">
+<header>
+    <h1 class="display-4"><%=title %></h1>
+</header>
+<div role="main">
+    <table class="table">
+        <tr>
+            <th>NAME</th>
+            <td><%= form.name %></td>
+        </tr>
+        <tr>
+            <th>PASSWORD</th>
+            <td><%= form.password %></th>
+        </tr>
+        <tr>
+            <th>MAIL</th>
+            <td><%= form.mail %></td>
+        </tr>
+        <tr>
+            <th>AGE</th>
+            <td><%= form.age %></th>
+        </tr>
+        <tr>
+            <th></th>
+            <td></td>
+        </tr>
+    </table>
+    <form method='post' action='/users/delete'>
+        <input type="hidden" name="id" value="<%= form.id %>">
+        <button type="submit" class="btn btn-danger">削除</button>
+    </form>
+</div>
+</body>
+</html>
