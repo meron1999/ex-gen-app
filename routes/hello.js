@@ -1,4 +1,5 @@
 var express = require('express');
+const { check, validationResult } = require('express-validator');
 var router = express.Router();
 const sqlite3 = require('sqlite3');
 
@@ -33,10 +34,33 @@ router.get('/', (req, res, next) =>{
   });
 
   router.get('/add', (req, res, next) => {
-    res.render('hello/add', { title: 'Hello/Add', content: '新しいレコードを入力：' });
+    res.render('hello/add', { title: 'Hello/Add', content: '新しいレコードを入力：', form: { name: '', mail: '', age:0 } });
   });
 
-  router.post('/add', (req, res, next) => {
+  router.post('/add',[ check('name').notEmpty().withMessage('名前は必須です'),
+    check('mail').isEmail().withMessage('メールアドレスは有効な形式でなければなりません'),
+    check('age').isInt({ min: 0 }).withMessage('年齢は0以上の整数でなければなりません'),
+    check('age','AGEは0以上120以下でなければなりません。').custom(value => {
+      return value >= 0 && value <= 120;
+    })
+  ],
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      var result ='<ul class="text-danger">';
+      var result_arr = errors.array();
+      for (var n in result_arr){
+        result += '<li>' + result_arr[n].msg + '</li>';
+      }
+      result += '</ul>';
+      var data = {
+        title: 'Hello/Add',
+        content:result,
+        form:req.body
+      };
+      res.render('hello/add', data);
+    }
+    else {
     const name = req.body.name;
     const mail = req.body.mail;
     const age = req.body.age;
@@ -44,7 +68,8 @@ router.get('/', (req, res, next) =>{
       db.run("INSERT INTO mydata (name, mail, age) VALUES (?, ?, ?)", name, mail, age);
     });
     res.redirect('/hello');
-  });
+  }
+});
 
 router.get('/show',(req, res, next)=>{
   const id = req.query.id;
