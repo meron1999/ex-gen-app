@@ -1,16 +1,4 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" crossorigin="anonymous">
-    <title><%=title %></title>
-</head>
-
-<body class="container">
-<header>
-    <h1 class="display-4"><%=title %></h1>
-</header>
-<div role="main">
+<%- include('../partials/header.ejs') %>
     <ol class ="text-danger">
         <% if (err) { %>
             <% for(let [key, value] of err) { %>
@@ -68,6 +56,4 @@
         </div>
         <button type="submit" class="btn btn-primary">更新</button>
     </form>
-</div>
-</body>
-</html>
+<%- include('../partials/footer.ejs') %>

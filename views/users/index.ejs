@@ -1,25 +1,28 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" crossorigin="anonymous">
-    <title><%=title %></title>
-</head>
-<body class="container">
-<header>
-    <h1 class="display-4"><%=title %></h1>
-</header>
-<div role="main">
+<%- include('../partials/header.ejs') %>
     <table class="table">
-        <% for(var i in content) { %>
+        <thead>
             <tr>
-                <td><%= content[i].id %></td>
-                <td><%= content[i].name %></td>
-                <td><%= content[i].mail %></td>
-                <td><%= content[i].age %></td>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Mail</th>
+                <th>Age</th>
+                <th>Actions</th>
             </tr>
-        <% } %>
+        </thead>
+        <tbody>
+            <% for(var i in content) { %>
+                <tr>
+                    <td><%= content[i].id %></td>
+                    <td><%= content[i].name %></td>
+                    <td><%= content[i].mail %></td>
+                    <td><%= content[i].age %></td>
+                    <td>
+                        <a href="/users/edit?id=<%= content[i].id %>" class="btn btn-sm btn-info">Edit</a>
+                        <a href="/users/delete?id=<%= content[i].id %>" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+            <% } %>
+        </tbody>
     </table>
-</div>
-</body>
-</html>
+    <p><a href="/users/add" class="btn btn-primary">Add New User</a></p>
+<%- include('../partials/footer.ejs') %>

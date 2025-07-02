@@ -1,0 +1,26 @@
+<% if(val != null) { %>
+    <tr class="row">
+        <th class="col-2">
+            <a class ="text-dark" href="/borads/home/<%= val.User.name %>/<%= val.User.id %>/0"><%= val.User.name %></a>
+        </th>  
+        <td class="col-7">
+            <%= val.message %>
+        </td>
+        <% 
+            var d = new Date(val.createdAt);
+            var dstr =d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' +d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
+        %>
+        <td class="col-3">
+            <span class="text-secondary"><%= dstr %></span>
+        </td>
+        <td class="col-1">
+            <a href="/borads/delete/<%= val.id %>" class="btn btn-danger btn-sm">削除</a>
+        </td>
+    </tr>
+<% } else { %>
+    <tr class="row">    
+        <td class="col-12">
+            <p class="text-secondary">No messages.</p>
+        </td>
+    </tr>
+<% } %>

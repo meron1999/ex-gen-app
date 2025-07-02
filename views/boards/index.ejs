@@ -1,0 +1,48 @@
+<%- include('../partials/header.ejs') %>
+
+<% if (login) { %>
+  <div class="alert alert-primary">
+    <p class="mb-0">Welcome, <%= login.name %>! | <a href="/users/logout">Logout</a></p>
+    <p class="mb-0">Your posts: <a href="/boards/home/<%= login.id %>/0">My Home</a></p>
+  </div>
+<% } %>
+
+<form method="post" action="/boards/add">
+  <div class="form-group">
+    <label for="msg">Post a message:</label>
+    <textarea name="msg" id="msg" class="form-control" required></textarea>
+  </div>
+  <button type="submit" class="btn btn-primary mt-2">Post</button>
+</form>
+
+<table class="table mt-4">
+  <thead>
+    <tr>
+      <th>Message</th>
+      <th>Posted by</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% for(let item of content) { %>
+      <tr>
+        <td><%- item.message.replace(/\n/g, '<br>') %></td>
+        <td>
+          <a href="/boards/home/<%= item.user.name %>/<%= item.userId %>/0">
+            <%= item.user.name %>
+          </a>
+        </td>
+        <td><%= item.createdAt.toLocaleString() %></td>
+      </tr>
+    <% } %>
+  </tbody>
+</table>
+
+<nav>
+  <ul class="pagination">
+      <li class="page-item <%= page <= 0 ? 'disabled' : '' %>"><a class="page-link" href="/boards/<%= page - 1 %>">Previous</a></li>
+      <li class="page-item <%= content.length < pnum ? 'disabled' : '' %>"><a class="page-link" href="/boards/<%= page + 1 %>">Next</a></li>
+  </ul>
+</nav>
+
+<%- include('../partials/footer.ejs') %>

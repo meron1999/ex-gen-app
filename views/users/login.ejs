@@ -1,0 +1,16 @@
+<%- include('../partials/header.ejs') %>
+    <p><%- content %></p>
+    <form method='post' action='/users/login'>
+        <div class="form-group">
+            <label for="name">名前</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="名前を入力してください" value="<%= typeof name !== 'undefined' ? name : '' %>">
+        </div>
+        <div class="form-group">
+            <label for="pass">パスワード</label>
+            <input type="password" class="form-control" id="pass" name="pass" placeholder="パスワードを入力してください">
+        </div>
+        <button type="submit" class="btn btn-primary">ログイン</button>
+    </form>
+    <p class ="mt-4"><a href="/boards">&lt;&lt; Top へ戻る</a>
+    <a href ="/users/add">アカウントの作成&gt;&gt;</a></p>
+<%- include('../partials/footer.ejs') %>

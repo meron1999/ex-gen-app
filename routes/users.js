@@ -2,17 +2,20 @@ var express = require('express');
 var router = express.Router();
 const db =require('../models/index');
 const {Op} = require('sequelize');
+const bcrypt = require('bcryptjs');
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-  var id = req.query.id ? parseInt(req.query.id) : 1000; // デフォルト値を設定
-  db.User.findAll({where:{id:{[Op.lte]:id}}}).then(users => {
-    var data ={
+router.get('/', async (req, res, next) => {
+  try {
+    const users = await db.User.findAll();
+    const data = {
       title:'Users/Index',
       content:users
-    }
+    };
     res.render('users/index', data);
-  });
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.get('/add',(req, res, next) => {
@@ -26,30 +29,33 @@ router.get('/add',(req, res, next) => {
 
 router.post('/add', async (req, res, next) => {
   try {
+    // パスワードをハッシュ化
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(req.body.pass, salt);
+
     await db.User.create({
       name: req.body.name,
-      pass: req.body.pass,
+      pass: hash, // ハッシュ化されたパスワードを保存
       mail: req.body.mail,
       age: req.body.age
     });
     res.redirect('/users');
   } catch (err) {
-    var data = {
-      title: 'Users/Add',
-      form: req.body, // ユーザーが入力した値を保持
-      err: null // 初期化
-    };
     if (err.name === 'SequelizeValidationError') {
       // Sequelizeのバリデーションエラーを処理
       const errorMap = new Map();
       err.errors.forEach(e => {
         errorMap.set(e.path, [e.message]); // 各フィールドのエラーメッセージを配列で保持
       });
-      data.err = errorMap;
+      const data = {
+        title: 'Users/Add',
+        form: req.body, // ユーザーが入力した値を保持
+        err: errorMap
+      };
+      res.render('users/add', data);
     } else {
-      next(err); // その他のエラーは次のエラーハンドラへ
+      return next(err); // その他のエラーは次のエラーハンドラへ
     }
-    res.render('users/add', data);
   }
 });
 
@@ -59,7 +65,8 @@ router.get('/edit', async (req, res, next) => {
     if (user) {
       res.render('users/edit', {
         title: 'Users/Edit',
-        form:user
+        form: user,
+        err: null // Pass null for err on initial page load
       });
     } else {
       res.status(404).send('User not found');
@@ -71,24 +78,37 @@ router.get('/edit', async (req, res, next) => {
 
 router.post('/edit', async (req, res, next) => {
   try {
-    const [updatedCount] = await db.User.update(
-      {
-        name: req.body.name,
-        pass: req.body.pass,
-        mail: req.body.mail,
-        age: req.body.age,
-      },
-      {
-        where: { id: req.body.id }
-      }
-    );
-    if (updatedCount > 0) {
-      res.redirect('/users');
-    } else {
-      res.status(404).send('User not found');
+    const user = await db.User.findByPk(req.body.id);
+    if (!user) {
+      return res.status(404).send('User not found');
     }
+    // Update user properties from the form
+    user.name = req.body.name;
+    user.mail = req.body.mail;
+    user.age = req.body.age;
+    // パスワードが入力された場合のみ更新
+    if (req.body.pass) {
+      const salt = await bcrypt.genSalt(10);
+      user.pass = await bcrypt.hash(req.body.pass, salt);
+    }
+
+    // Save changes, which will trigger validation
+    await user.save();
+    res.redirect('/users');
   } catch (err) {
-    next(err);
+    // If a validation error occurs, re-render the form with errors
+    if (err.name === 'SequelizeValidationError') {
+      const errorMap = new Map();
+      err.errors.forEach(e => {
+        errorMap.set(e.path, [e.message]);
+      });
+      return res.render('users/edit', {
+        title: 'Users/Edit',
+        form: req.body, // Use req.body to preserve user's input
+        err: errorMap
+      });
+    }
+    next(err); // Pass other errors to the main error handler
   }
 }); 
 
@@ -121,6 +141,57 @@ router.post('/delete', async (req, res, next) => {
   } catch (err) {
     next(err);      
   }
+});
+
+router.get('/login', (req, res, next) => {
+  var data = {
+    title: 'Users/Login',
+    content:'名前とパスワードを入力してください',
+  }
+  res.render('users/login', data);
+});
+
+router.post('/login', async (req, res, next) => {
+  try {
+    const user = await db.User.findOne({
+      where: {
+        name: req.body.name
+      }
+    });
+
+    // Timing attack protection:
+    // By always running the expensive bcrypt.compare function, we prevent an attacker
+    // from guessing valid usernames based on response time differences.
+    // If the user is not found, we use a dummy hash that is guaranteed to fail.
+    const DUMMY_HASH = '$2b$10$fakedummyhashforsecuritypurposes.xxxxxxxxxxxxxxxxxx';
+    const hashToCompare = user ? user.pass : DUMMY_HASH;
+    const passwordFromUser = req.body.pass || ''; // Handle empty password submission
+
+    const match = await bcrypt.compare(passwordFromUser, hashToCompare);
+
+    if (match && user) { // Double-check user exists
+      req.session.login = user; // セッションにユーザー情報を保存
+      res.redirect('/'); // ログイン成功後のリダイレクト先
+    } else {
+      res.render('users/login', {
+        title: 'Users/Login',
+        content: '名前またはパスワードが間違っています。',
+        // Preserve username on failed login for better UX
+        name: req.body.name
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/logout', (req, res, next) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.redirect('/users/login');
+  });
 });
 
 module.exports = router;

@@ -1,0 +1,36 @@
+<%- include('../partials/header.ejs') %>
+
+<div class="alert alert-info">
+  <p class="mb-0">This is the home page for <strong><%= userName %></strong>.</p>
+  <p class="mb-0"><a href="/boards">&lt;&lt; Back to All Posts</a></p>
+</div>
+
+<table class="table mt-4">
+  <thead>
+    <tr>
+      <th>Message</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% for(let item of content) { %>
+      <tr>
+        <td><%- item.message.replace(/\n/g, '<br>') %></td>
+        <td><%= item.createdAt.toLocaleString() %></td>
+      </tr>
+    <% } %>
+  </tbody>
+</table>
+
+<nav>
+  <ul class="pagination">
+    <li class="page-item <%= page <= 0 ? 'disabled' : '' %>">
+      <a class="page-link" href="/boards/home/<%= userName %>/<%= userId %>/<%= page - 1 %>">Previous</a>
+    </li>
+    <li class="page-item <%= content.length < pnum ? 'disabled' : '' %>">
+      <a class="page-link" href="/boards/home/<%= userName %>/<%= userId %>/<%= page + 1 %>">Next</a>
+    </li>
+  </ul>
+</nav>
+
+<%- include('../partials/footer.ejs') %>
