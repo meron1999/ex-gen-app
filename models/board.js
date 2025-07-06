@@ -18,18 +18,22 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Board.init({
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: { msg: 'タイトルを入力してください。' }
+      }
+    },
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      validate: {
-        notEmpty: true
-      }
     },
     message: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        notEmpty: true
+        notEmpty: { msg: 'メッセージを入力してください。' }
       }
     }
   }, {
